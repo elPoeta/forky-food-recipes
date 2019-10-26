@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 
+require('./startUp/initDB')();
+require('./startUp/parse')(app);
+
 const { PORT } = require('./config/keys');
 
 app.listen(PORT, err => {
