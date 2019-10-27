@@ -1,5 +1,6 @@
 const { OAuth2Client } = require('google-auth-library');
-const { GOOGLE_ID } = require('../config/keys');
+const jwt = require('jsonwebtoken');
+const { GOOGLE_ID, GOOGLE_SECRET } = require('../config/keys');
 const asyncHandler = require('../middlewares/asyncHandler');
 const User = require('../models/user');
 
@@ -39,11 +40,18 @@ module.exports = {
       res.status(403).json({ error: "Invalid Token" });
       return;
     }
-    const { googleId, email, name, image } = payload
+    const { googleId, email, name, image, iat, exp } = payload
     const foundUser = await User.findOne({ email });
     if (foundUser) {
-      res.status(403).json({ error: 'User already exist' });
-      return
+      const token = jwt.sign({
+        user: foundUser
+      }, GOOGLE_SECRET, { expiresIn: exp });
+      return res.status(200).json({
+        autenticated: true,
+        user: foundUser,
+        token,
+      });
+      //return res.status(403).json({ error: 'User already exist' });
     }
 
     const newUser = new User({
@@ -54,7 +62,14 @@ module.exports = {
     });
 
     const user = await newUser.save();
+    const token = jwt.sign({
+      user: user
+    }, GOOGLE_SECRET, { expiresIn: exp });
 
-    res.json({ payload: user })
+    res.status(200).json({
+      autenticated: true,
+      user,
+      token,
+    });
   })
 }
