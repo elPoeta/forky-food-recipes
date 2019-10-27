@@ -1,5 +1,6 @@
 const { OAuth2Client } = require('google-auth-library');
 const { GOOGLE_ID } = require('../config/keys');
+const asyncHandler = require('../middlewares/asyncHandler');
 const User = require('../models/user');
 
 const verify = async token => {
@@ -31,7 +32,7 @@ const verify = async token => {
   };
 }
 module.exports = {
-  async googleSiging(req, res) {
+  googleSiging: asyncHandler(async (req, res) => {
     const { idtoken } = req.body;
     const payload = await verify(idtoken);
     if (payload === null) {
@@ -55,5 +56,5 @@ module.exports = {
     const user = await newUser.save();
 
     res.json({ payload: user })
-  }
+  })
 }
