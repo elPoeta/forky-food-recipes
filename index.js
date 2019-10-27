@@ -3,6 +3,7 @@ const app = express();
 
 require('./startUp/initDB')();
 require('./startUp/parse')(app);
+require('./startUp/router')(app);
 
 const { PORT } = require('./config/keys');
 
