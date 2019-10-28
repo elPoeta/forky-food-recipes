@@ -62,14 +62,16 @@ module.exports = {
     });
 
     const user = await newUser.save();
-    const token = jwt.sign({
+    const signToken = jwt.sign({
       user: user
     }, GOOGLE_SECRET, { expiresIn: exp });
-
-    res.status(200).json({
-      autenticated: true,
-      user,
-      token,
-    });
+    const token = `Bearer ${signToken}`;
+    res
+      .header("authorization", token)
+      .status(200).json({
+        autenticated: true,
+        user,
+        token,
+      });
   })
 }
